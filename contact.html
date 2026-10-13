@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Contact — Barusology Initiative</title>
+        <meta
+            name="description"
+            content="Tell Barusology Initiative what you're building. Mobile apps, AI automation and digital products — a reply within 48 hours."
+        />
+        <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+        <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
+    <body>
+        <header class="site-header">
+            <div class="container header-inner">
+                <a class="logo" href="index.html" aria-label="Barusology Initiative home">
+                    <span class="logo-mark" aria-hidden="true"></span>
+                    <span class="logo-text"><b>Barusology</b><span>Initiative</span></span>
+                </a>
+
+                <nav class="nav" id="nav">
+                    <a href="index.html#services">Services</a>
+                    <a href="index.html#results">What you get</a>
+                    <a href="index.html#process">Process</a>
+                    <a href="index.html#products">Products</a>
+                    <a href="index.html#faq">FAQ</a>
+                    <a class="btn btn-primary" href="contact.html">Contact me</a>
+                </nav>
+
+                <a class="btn btn-primary header-cta" href="contact.html">
+                    Contact me
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                </a>
+
+                <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <section class="page-head">
+                <div class="container">
+                    <span class="kicker">Contact</span>
+                    <h1 style="font-size: clamp(32px, 5vw, 52px); margin-top: 14px">
+                        Let's scope your project
+                    </h1>
+                    <p class="hero-sub">
+                        Six short fields. If it's a fit you'll get a written scope and a fixed price
+                        back — if it isn't, I'll say so and point you somewhere better.
+                    </p>
+                </div>
+            </section>
+
+            <section class="section" style="padding-top: 40px">
+                <div class="container contact-grid">
+                    <!-- ---------------- form ---------------- -->
+                    <div class="form-card reveal">
+                        <div class="form-status" id="form-status" role="status" aria-live="polite">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v4M12 16h.01" /></svg>
+                            <span></span>
+                        </div>
+
+                        <form id="contact-form" novalidate>
+                            <div class="field-row">
+                                <div class="field">
+                                    <label for="name">Name <span class="req">*</span></label>
+                                    <input class="input" id="name" name="name" type="text" autocomplete="name" placeholder="Your name" data-required />
+                                    <span class="err">Please add your name.</span>
+                                </div>
+                                <div class="field">
+                                    <label for="email">Email <span class="req">*</span></label>
+                                    <input class="input" id="email" name="email" type="email" autocomplete="email" placeholder="you@company.com" data-required />
+                                    <span class="err">A valid email, so I can reply.</span>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label for="company">Company / startup</label>
+                                <input class="input" id="company" name="company" type="text" autocomplete="organization" placeholder="Where you work, or the project name" />
+                            </div>
+
+                            <div class="field-row">
+                                <div class="field">
+                                    <label for="service">What do you need? <span class="req">*</span></label>
+                                    <select class="select" id="service" name="service" data-required>
+                                        <option value="">Choose one…</option>
+                                        <option>Mobile app development</option>
+                                        <option>AI automation</option>
+                                        <option>Digital product (guide / template)</option>
+                                        <option>More than one of these</option>
+                                        <option>Something else</option>
+                                    </select>
+                                    <span class="err">Pick the closest match.</span>
+                                </div>
+                                <div class="field">
+                                    <label for="budget">Budget range</label>
+                                    <select class="select" id="budget" name="budget">
+                                        <option value="">Prefer not to say</option>
+                                        <option>Under $2k</option>
+                                        <option>$2k – $5k</option>
+                                        <option>$5k – $15k</option>
+                                        <option>$15k+</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label for="message">Project details <span class="req">*</span></label>
+                                <textarea class="textarea" id="message" name="message" placeholder="What are you building, who is it for, and what does done look like?" data-required></textarea>
+                                <span class="err">A few sentences is plenty.</span>
+                            </div>
+
+                            <button class="btn btn-primary" type="submit" style="width: 100%; justify-content: center">
+                                Send enquiry
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                            </button>
+
+                            <p class="form-note">
+                                Your details go straight to Barusology Initiative and nowhere else.
+                                No list, no newsletter sign-up.
+                            </p>
+                        </form>
+                    </div>
+
+                    <!-- ---------------- aside ---------------- -->
+                    <aside>
+                        <div class="aside-card reveal" style="--d: .08s">
+                            <h3>What happens next</h3>
+                            <ol>
+                                <li>I read it and reply within 48 hours.</li>
+                                <li>A 30-minute call to scope it properly.</li>
+                                <li>You get a written plan with a fixed price.</li>
+                            </ol>
+                        </div>
+
+                        <div class="aside-card reveal" style="--d: .16s">
+                            <h3>Prefer email?</h3>
+                            <p style="font-size: 14.5px; margin-top: 10px">
+                                Skip the form and write directly —
+                                <a href="mailto:hello@barusologyinitiative.com">hello@barusologyinitiative.com</a>
+                            </p>
+                            <p style="font-size: 14.5px; margin-top: 12px; color: var(--ink-3)">
+                                Remote, working with founders worldwide.
+                            </p>
+                        </div>
+
+                        <div class="aside-card reveal" style="--d: .24s">
+                            <h3>Not ready to talk?</h3>
+                            <p style="font-size: 14.5px; margin-top: 10px">
+                                Grab the free MVP Scope Sheet and bring it back filled in.
+                            </p>
+                            <a class="btn btn-ghost" href="index.html#products" style="margin-top: 16px">See products</a>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand">
+                        <a class="logo" href="index.html">
+                            <span class="logo-mark" aria-hidden="true"></span>
+                            <span class="logo-text"><b>Barusology</b><span>Initiative</span></span>
+                        </a>
+                        <p>
+                            Mobile apps, AI automation and practical digital products for startups —
+                            from first idea to a finished, working product.
+                        </p>
+                    </div>
+
+                    <div class="footer-col">
+                        <h4>Services</h4>
+                        <ul>
+                            <li><a href="index.html#services">Mobile app development</a></li>
+                            <li><a href="index.html#services">AI automation</a></li>
+                            <li><a href="index.html#products">Digital products</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-col">
+                        <h4>Company</h4>
+                        <ul>
+                            <li><a href="index.html#founder">Who you work with</a></li>
+                            <li><a href="index.html#process">Process</a></li>
+                            <li><a href="index.html#faq">FAQ</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-col">
+                        <h4>Contact</h4>
+                        <ul>
+                            <li><a href="contact.html">Start a project</a></li>
+                            <li><a href="mailto:hello@barusologyinitiative.com">hello@barusologyinitiative.com</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="footer-bottom">
+                    <span>© <span data-year>2026</span> Barusology Initiative. All rights reserved.</span>
+                    <span class="powered">
+                        <i aria-hidden="true"></i>
+                        Powered by <b>Barusology Initiative</b>
+                    </span>
+                </div>
+            </div>
+        </footer>
+
+        <script type="module" src="js/main.js"></script>
+    </body>
+</html>
