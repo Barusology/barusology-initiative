@@ -103,9 +103,9 @@ const form = document.getElementById("contact-form");
 
 if (form) {
     const status = document.getElementById("form-status");
-    /* `enabled` gates the Forms path: the endpoint exists and the entry
-       ids are correct, but the form currently refuses anonymous posts
-       (it demands a signed-in respondent) — see js/config.js */
+    /* `enabled` gates the Forms path so the site can be fallen back onto
+       mailto: if the form ever stops accepting anonymous posts — see
+       js/config.js for how to tell that apart from a code bug */
     const formReady = Boolean(
         GOOGLE_FORM.enabled &&
             GOOGLE_FORM.action &&

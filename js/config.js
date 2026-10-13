@@ -48,37 +48,32 @@ export const SITE = {
    by the site — leaving them out is valid, they are optional.
 
    ------------------------------------------------------------
-   WHY `enabled` IS STILL false
+   `enabled` — the anonymous-submission gate
    ------------------------------------------------------------
-   The live form currently renders these attributes:
+   Submissions were silently failing until the form stopped
+   requiring a signed-in respondent. When it did, an anonymous POST
+   to /formResponse returned 302 -> ServiceLogin?service=wise then
+   401, and because the post runs in a hidden iframe the visitor saw
+   "thanks" while no row reached the sheet.
 
-     data-sign-in-to-continue="true"
-     data-email-from-recipient-required="true"
+   Fixed on the form side: Collect email addresses → Do not collect,
+   plus "Limit to 1 response" off. Verified with a zero-write probe —
+   the viewform page no longer renders data-sign-in-to-continue, and
+   an empty POST now returns 400 with Google's own "This is a required
+   question" page, which proves the request got as far as validation.
 
-   That means it is set to collect the respondent's Google email
-   and require a signed-in account. POSTing to /formResponse
-   anonymously therefore does not record a response — Google
-   answers 302 -> accounts.google.com/ServiceLogin?service=wise
-   and then 401, exactly what we measured. Because the post
-   happens in a hidden iframe, a visitor would see "thanks, we'll
-   be in touch" while nothing reaches the sheet.
+   If leads ever stop arriving, re-run that probe before touching this
+   file; a 401 here means the setting has been switched back on
+   (usually by a Workspace policy), not that the code broke:
 
-   To turn real submissions on, in Google Forms:
+     curl -s <viewform URL> | grep -c 'data-sign-in-to-continue="true"'
 
-     Settings → Responses → Collect email addresses → Do not collect
-     Settings → Responses → turn OFF "Only allow respondents
-                     within my domain and organization"
-     Responses → ⋮ → Confirm "Accepting responses" is on
-
-   Then flip `enabled` below to true. Re-check without submitting
-   anything: the viewform page should no longer contain
-   data-sign-in-to-continue="true".
-
-   While `enabled` is false the site uses its mailto: fallback, so
-   enquiries still arrive — just by email instead of in the sheet.
+   Set `enabled` back to false to fall open onto the mailto: path,
+   which still delivers enquiries — just by email instead of in the
+   sheet.
    ------------------------------------------------------------ */
 export const GOOGLE_FORM = {
-    enabled: false,
+    enabled: true,
     action:
         "https://docs.google.com/forms/d/e/1FAIpQLSdyAxLybRMU9oh44Fjz81ZR5Nlfrk3WO0UyGfvSVJC6p9fYRQ/formResponse",
     entries: {

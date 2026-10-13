@@ -139,31 +139,22 @@ Two constraints in that schema shaped the site:
 - **Address is required.** Google refuses a POST that omits a required question, and because the post happens in a hidden iframe the visitor would still see "thanks" while no row is written. Rather than post a fake value into your sheet, the contact page asks "Where are you based?" — a genuine, low-friction question for a remote studio.
 - **Service Needed is a checkbox, not a dropdown.** It accepts only the three stored labels — `Mobile App`, `Ai Automation`, `Digital Product` — and takes one repeated `entry.1092678833` per ticked box. The contact page therefore uses three checkboxes whose `value` attributes are those exact labels, with friendlier wording displayed beside each. An unrecognised label fails validation the same way an empty answer does, so the previous "Something else" option had to go.
 
-### One setting still has to change on Google's side
+### Anonymous submissions were blocked — now resolved
 
-Submissions are **not live yet**. The published form is configured to identify the respondent, which the live page confirms with:
+Lead capture is live. It previously was not, and the reason is worth recording because it fails invisibly: the published form was configured to identify the respondent, which the live page advertised with `data-sign-in-to-continue="true"` and `data-email-from-recipient-required="true"`. An anonymous `POST` to `/formResponse` did not record a response — it returned `302 → accounts.google.com/ServiceLogin?service=wise`, then `401`. Because the post runs in a hidden iframe, the visitor saw "thanks" while nothing reached the sheet.
 
-```
-data-sign-in-to-continue="true"
-data-email-from-recipient-required="true"
-```
+Fixed in the form's own settings: **Collect email addresses → Do not collect**, and **"Limit to 1 response" off** (that toggle alone forces sign-in, even with email collection switched off). `GOOGLE_FORM.enabled` is now `true`.
 
-An anonymous `POST` to its `/formResponse` therefore does not record a response — it returns `302 → accounts.google.com/ServiceLogin?service=wise`, then `401`. That was measured directly. A marketing site's visitors are anonymous by definition, so the setting has to come off:
-
-1. Open the form → **Settings** → **Responses**.
-2. **Collect email addresses** → **Do not collect**.
-3. Turn **off** "Only allow respondents within my domain and organization".
-4. **Responses** → ⋮ → confirm **Accepting responses** is on.
-5. In `js/config.js`, set `GOOGLE_FORM.enabled` to `true`.
-
-To confirm the fix without creating a test lead, re-fetch the form and check the attribute is gone:
+If leads ever stop arriving, run this before touching any code — it distinguishes a switched-back setting from a real bug, and creates no test lead:
 
 ```bash
 curl -s "https://docs.google.com/forms/d/e/1FAIpQLSdyAxLybRMU9oh44Fjz81ZR5Nlfrk3WO0UyGfvSVJC6p9fYRQ/viewform" \
-  | grep -c 'data-sign-in-to-continue="true"'   # 0 = anonymous posts will work
+  | grep -c 'data-sign-in-to-continue="true"'
+# 0 = anonymous posting allowed (look for a code bug)
+# 1 = the setting is back on, often pushed by a Workspace admin policy
 ```
 
-Until `enabled` is `true` the site uses its `mailto:` fallback, so enquiries still arrive — by email rather than in the sheet.
+Set `enabled` back to `false` to fall open onto the `mailto:` path, which still delivers enquiries — by email instead of into the sheet.
 
 **How the submission works.** `main.js` requires `enabled`, a non-empty `action`, and every `entries` value filled. Then it posts into a hidden iframe against the Forms endpoint — the visitor never leaves the page and no server is involved. Empty optional fields are omitted from the body rather than sent blank. Client-side validation runs first: name, email, location, at least one service and project details are required, the email is pattern-checked, and errors appear inline on the field.
 
@@ -237,7 +228,7 @@ CNAME   www     <username>.github.io
 
 These are still placeholders and read as such to a visitor:
 
-- [ ] **Google Form: flip `GOOGLE_FORM.enabled` to `true`** — the ids are wired and correct, but the form still requires a signed-in respondent, so anonymous posts are refused. Follow the four Settings steps in [Connecting the contact form](#connecting-the-contact-form), then enable it. Until then the site collects leads by `mailto:`, which works but is invisible to the sheet.
+- [ ] **Send one real test enquiry** and delete the row afterwards. Anonymous posting is verified open, but the end-to-end write has not been confirmed — proving it means creating a response, which is your call, not something to do silently.
 - [ ] `SITE.email` — `hello@barusologyinitiative.com` is invented; point it at a mailbox that exists.
 - [ ] Founder name, photo and biography.
 - [ ] The three product titles and their prices.
