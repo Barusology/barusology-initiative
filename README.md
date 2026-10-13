@@ -116,45 +116,56 @@ export const SITE = {
 };
 ```
 
-`SITE.email` is also what the form fallback uses to compose a pre-filled message when no Google Form is connected, so it should be a mailbox you actually read.
+`SITE.email` is also what the form fallback uses to compose a pre-filled message whenever the Google Form path is not enabled, so it should be a mailbox you actually read.
 
 ## Connecting the contact form
 
 A browser cannot write into a Google Sheet directly. Google Forms is the service that does the writing, and it can be pointed at an existing spreadsheet — so the site collects leads and the data still lands in your sheet.
 
-1. Go to [forms.google.com](https://forms.google.com) → **Blank form**.
-2. Add these six fields, in this order, all left **optional**:
+The form ("Contact information", nine questions) is created and its entry ids are already wired into `js/config.js`:
 
-   | Field | Question type |
-   | --- | --- |
-   | Name | Short answer |
-   | Email | Short answer |
-   | Company / Startup | Short answer |
-   | Service needed | Dropdown |
-   | Budget | Dropdown |
-   | Project details | Paragraph |
+| Site field | Form question | Type | Entry |
+| --- | --- | --- | --- |
+| Name | Name | short text, **required** | `entry.544302269` |
+| Where are you based? | Address | paragraph, **required** | `entry.1065046570` |
+| Email | Email | short text, **required** | `entry.1045781291` |
+| Company / startup | Company/Startup | short text | `entry.1510456028` |
+| What do you need? | Service Needed | **checkbox**, required | `entry.1092678833` |
+| Project details | Project Details | paragraph | `entry.2078994464` |
+| Budget range | Budget | paragraph | `entry.2081903089` |
 
-3. **Responses** tab → ⋮ menu → **Select response destination** → **Existing spreadsheet** → pick your spreadsheet.
-4. In the form editor, ⋮ → **Send** → `</>` (embed) → copy the URL in `src="…"`, up to and including `/formResponse`. That string is your `action`.
-5. Open the live form in a new tab, right-click → **View page source**, and copy each question's `name="entry.##########"` value.
+Two constraints in that schema shaped the site:
 
-Fill both into `js/config.js`:
+- **Address is required.** Google refuses a POST that omits a required question, and because the post happens in a hidden iframe the visitor would still see "thanks" while no row is written. Rather than post a fake value into your sheet, the contact page asks "Where are you based?" — a genuine, low-friction question for a remote studio.
+- **Service Needed is a checkbox, not a dropdown.** It accepts only the three stored labels — `Mobile App`, `Ai Automation`, `Digital Product` — and takes one repeated `entry.1092678833` per ticked box. The contact page therefore uses three checkboxes whose `value` attributes are those exact labels, with friendlier wording displayed beside each. An unrecognised label fails validation the same way an empty answer does, so the previous "Something else" option had to go.
 
-```js
-export const GOOGLE_FORM = {
-  action: "https://docs.google.com/forms/d/e/1FAIpQLS…/formResponse",
-  entries: {
-    name: "entry.000000001",
-    email: "entry.000000002",
-    company: "entry.000000003",
-    service: "entry.000000004",
-    budget: "entry.000000005",
-    message: "entry.000000006",
-  },
-};
+### One setting still has to change on Google's side
+
+Submissions are **not live yet**. The published form is configured to identify the respondent, which the live page confirms with:
+
+```
+data-sign-in-to-continue="true"
+data-email-from-recipient-required="true"
 ```
 
-**How the submission works.** `main.js` checks that `action` is set and all six `entries` are non-empty. If they are, the enquiry posts into a hidden iframe against the Forms endpoint — the visitor never leaves the page and no server is involved. If any field is missing, the site falls back to opening a pre-filled email so a lead is never silently dropped. Client-side validation always runs first: name, email, service and project details are required, the email is pattern-checked, and errors appear inline on the field.
+An anonymous `POST` to its `/formResponse` therefore does not record a response — it returns `302 → accounts.google.com/ServiceLogin?service=wise`, then `401`. That was measured directly. A marketing site's visitors are anonymous by definition, so the setting has to come off:
+
+1. Open the form → **Settings** → **Responses**.
+2. **Collect email addresses** → **Do not collect**.
+3. Turn **off** "Only allow respondents within my domain and organization".
+4. **Responses** → ⋮ → confirm **Accepting responses** is on.
+5. In `js/config.js`, set `GOOGLE_FORM.enabled` to `true`.
+
+To confirm the fix without creating a test lead, re-fetch the form and check the attribute is gone:
+
+```bash
+curl -s "https://docs.google.com/forms/d/e/1FAIpQLSdyAxLybRMU9oh44Fjz81ZR5Nlfrk3WO0UyGfvSVJC6p9fYRQ/viewform" \
+  | grep -c 'data-sign-in-to-continue="true"'   # 0 = anonymous posts will work
+```
+
+Until `enabled` is `true` the site uses its `mailto:` fallback, so enquiries still arrive — by email rather than in the sheet.
+
+**How the submission works.** `main.js` requires `enabled`, a non-empty `action`, and every `entries` value filled. Then it posts into a hidden iframe against the Forms endpoint — the visitor never leaves the page and no server is involved. Empty optional fields are omitted from the body rather than sent blank. Client-side validation runs first: name, email, location, at least one service and project details are required, the email is pattern-checked, and errors appear inline on the field.
 
 > Never commit a private spreadsheet **edit** URL into this repository. The `action` above is a public form endpoint and is safe to publish; an edit link to a Sheet is not.
 
@@ -226,7 +237,7 @@ CNAME   www     <username>.github.io
 
 These are still placeholders and read as such to a visitor:
 
-- [ ] `GOOGLE_FORM` in `js/config.js` — no form is connected yet; the site is on its `mailto:` fallback.
+- [ ] **Google Form: flip `GOOGLE_FORM.enabled` to `true`** — the ids are wired and correct, but the form still requires a signed-in respondent, so anonymous posts are refused. Follow the four Settings steps in [Connecting the contact form](#connecting-the-contact-form), then enable it. Until then the site collects leads by `mailto:`, which works but is invisible to the sheet.
 - [ ] `SITE.email` — `hello@barusologyinitiative.com` is invented; point it at a mailbox that exists.
 - [ ] Founder name, photo and biography.
 - [ ] The three product titles and their prices.

@@ -13,43 +13,82 @@ export const SITE = {
 };
 
 /* ------------------------------------------------------------
-   GOOGLE FORM
+   GOOGLE FORM — "Contact information"
    ------------------------------------------------------------
-   A browser cannot write straight into a Google Sheet — Google
-   Forms is the service that does the writing, and it can be
-   pointed at your existing spreadsheet:
+   Live form. The `action` is the /formResponse endpoint of the
+   public viewform link; entry ids below were read out of the
+   form's own FB_PUBLIC_LOAD_DATA_ schema, in question order:
 
-     1. forms.google.com → Blank form
-     2. Add these 6 questions (exact wording does not matter,
-        but keep them in this order and all "Required" off):
-            Name (Short answer)
-            Email (Short answer)
-            Company / Startup (Short answer)
-            Service needed (Dropdown)
-            Budget (Dropdown)
-            Project details (Paragraph)
-     3. Responses tab → ⋮ (top right) → Select response
-        destination → Existing spreadsheet → pick
-        "Barusology Initiative" sheet.
-     4. ⋮ (top right of the form editor) → Send → </> (embed)
-        → copy the URL in src="..." up to /formResponse.
-        That is your `action`.
-     5. Still needed: each question has an internal id like
-        entry.1234567890. Open the live form in a new tab,
-        right-click → View page source, find each question's
-        name="entry.…" and paste it below.
+     Name            short text   REQUIRED   entry.544302269
+     Address         paragraph    REQUIRED   entry.1065046570
+     Email           short text   REQUIRED   entry.1045781291
+     Phone number    short text   optional   entry.1166974658
+     Company/Startup short text   optional   entry.1510456028
+     Service Needed  CHECKBOX     REQUIRED   entry.1092678833
+     Project Details paragraph    optional   entry.2078994464
+     Budget          paragraph    optional   entry.2081903089
+     Comments        paragraph    optional   entry.839337160
 
-   Until `action` is filled in the contact form falls back to
-   opening a pre-filled email, so the site is never dead.
+   Two things about this list are easy to get wrong:
+
+   1. Address is REQUIRED. Google silently refuses a POST that
+      omits a required question — the row never reaches the
+      sheet and the visitor still sees "thanks". The site asks
+      for it as "Where are you based?".
+
+   2. Service Needed is a checkbox, not a dropdown, so it takes
+      one repeated entry.1092678833 per ticked box and only the
+      exact stored labels are valid: "Mobile App",
+      "Ai Automation", "Digital Product". Anything else fails
+      validation the same way an empty answer does. The labels
+      live in contact.html as option values; the friendlier
+      wording a visitor reads is the label text beside it.
+
+   Phone number and Comments are collected by the form but not
+   by the site — leaving them out is valid, they are optional.
+
+   ------------------------------------------------------------
+   WHY `enabled` IS STILL false
+   ------------------------------------------------------------
+   The live form currently renders these attributes:
+
+     data-sign-in-to-continue="true"
+     data-email-from-recipient-required="true"
+
+   That means it is set to collect the respondent's Google email
+   and require a signed-in account. POSTing to /formResponse
+   anonymously therefore does not record a response — Google
+   answers 302 -> accounts.google.com/ServiceLogin?service=wise
+   and then 401, exactly what we measured. Because the post
+   happens in a hidden iframe, a visitor would see "thanks, we'll
+   be in touch" while nothing reaches the sheet.
+
+   To turn real submissions on, in Google Forms:
+
+     Settings → Responses → Collect email addresses → Do not collect
+     Settings → Responses → turn OFF "Only allow respondents
+                     within my domain and organization"
+     Responses → ⋮ → Confirm "Accepting responses" is on
+
+   Then flip `enabled` below to true. Re-check without submitting
+   anything: the viewform page should no longer contain
+   data-sign-in-to-continue="true".
+
+   While `enabled` is false the site uses its mailto: fallback, so
+   enquiries still arrive — just by email instead of in the sheet.
    ------------------------------------------------------------ */
 export const GOOGLE_FORM = {
-    action: "",
+    enabled: false,
+    action:
+        "https://docs.google.com/forms/d/e/1FAIpQLSdyAxLybRMU9oh44Fjz81ZR5Nlfrk3WO0UyGfvSVJC6p9fYRQ/formResponse",
     entries: {
-        name: "",
-        email: "",
-        company: "",
-        service: "",
-        budget: "",
-        message: "",
+        name: "entry.544302269",
+        address: "entry.1065046570",
+        email: "entry.1045781291",
+        company: "entry.1510456028",
+        service: "entry.1092678833",
+        message: "entry.2078994464",
+        budget: "entry.2081903089",
     },
 };
+

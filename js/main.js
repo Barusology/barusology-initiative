@@ -103,8 +103,12 @@ const form = document.getElementById("contact-form");
 
 if (form) {
     const status = document.getElementById("form-status");
+    /* `enabled` gates the Forms path: the endpoint exists and the entry
+       ids are correct, but the form currently refuses anonymous posts
+       (it demands a signed-in respondent) — see js/config.js */
     const formReady = Boolean(
-        GOOGLE_FORM.action &&
+        GOOGLE_FORM.enabled &&
+            GOOGLE_FORM.action &&
             Object.values(GOOGLE_FORM.entries).every(Boolean),
     );
 
@@ -126,13 +130,23 @@ if (form) {
             field.classList.toggle("invalid", bad);
             if (bad) ok = false;
         });
+        /* a checkbox group is required as a set, not per box */
+        form.querySelectorAll("[data-required-group]").forEach((group) => {
+            const name = group.getAttribute("data-required-group");
+            const bad = !form.querySelector(
+                `input[name="${name}"]:checked`,
+            );
+            group.classList.toggle("invalid", bad);
+            if (bad) ok = false;
+        });
         return ok;
     };
 
     form.querySelectorAll("input, select, textarea").forEach((el) => {
-        el.addEventListener("input", () => {
-            el.closest(".field")?.classList.remove("invalid");
-        });
+        const clear = () => el.closest(".field")?.classList.remove("invalid");
+        el.addEventListener("input", clear);
+        /* checkboxes and radios report on change, not input */
+        el.addEventListener("change", clear);
     });
 
     /* builds the payload once, reused by both submit paths */
@@ -141,8 +155,10 @@ if (form) {
         return {
             name: (data.get("name") || "").toString().trim(),
             email: (data.get("email") || "").toString().trim(),
+            address: (data.get("address") || "").toString().trim(),
             company: (data.get("company") || "").toString().trim(),
-            service: (data.get("service") || "").toString(),
+            /* multi-select: Google takes one repeated entry per choice */
+            service: data.getAll("service").map(String),
             budget: (data.get("budget") || "").toString(),
             message: (data.get("message") || "").toString().trim(),
         };
@@ -162,21 +178,23 @@ if (form) {
         const values = payload();
 
         if (!formReady) {
+            const services = values.service.join(", ") || "—";
             const body = [
                 `Name: ${values.name}`,
                 `Email: ${values.email}`,
+                `Based in: ${values.address}`,
                 `Company / Startup: ${values.company || "—"}`,
-                `Service needed: ${values.service || "—"}`,
+                `Service needed: ${services}`,
                 `Budget: ${values.budget || "—"}`,
                 "",
                 values.message,
             ].join("\n");
             window.location.href = `mailto:${SITE.email}?subject=${encodeURIComponent(
-                `New project enquiry — ${values.service || "Barusology Initiative"}`,
+                `New project enquiry — ${services}`,
             )}&body=${encodeURIComponent(body)}`;
             showStatus(
                 "warn",
-                `Your email app should be opening with the details filled in. The site is not wired to a Google Form yet — add the Form URL in js/config.js to collect leads automatically.`,
+                `Your email app should be opening with the details filled in — hit send and it reaches me either way. If nothing opened, write to ${SITE.email} directly.`,
             );
             return;
         }
@@ -201,11 +219,20 @@ if (form) {
         poster.target = frameName;
         poster.style.display = "none";
         Object.entries(GOOGLE_FORM.entries).forEach(([key, entryId]) => {
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.name = entryId;
-            input.value = values[key] || "";
-            poster.appendChild(input);
+            const value = values[key];
+            const list = Array.isArray(value) ? value : [value];
+            /* an empty string on a required question fails Google's own
+               validation, so unanswered optional fields are left out */
+            list
+                .map((v) => (v == null ? "" : String(v)))
+                .filter(Boolean)
+                .forEach((v) => {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = entryId;
+                    input.value = v;
+                    poster.appendChild(input);
+                });
         });
         /* optional extra question: which page the lead came from */
         if (GOOGLE_FORM.entries.source) {

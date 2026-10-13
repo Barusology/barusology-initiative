@@ -89,19 +89,28 @@
                                 <input class="input" id="company" name="company" type="text" autocomplete="organization" placeholder="Where you work, or the project name" />
                             </div>
 
+                            <fieldset class="field checks" data-required-group="service">
+                                <legend>What do you need? <span class="req">*</span></legend>
+                                <label class="check">
+                                    <input type="checkbox" name="service" value="Mobile App" />
+                                    <span>Mobile app development</span>
+                                </label>
+                                <label class="check">
+                                    <input type="checkbox" name="service" value="Ai Automation" />
+                                    <span>AI automation</span>
+                                </label>
+                                <label class="check">
+                                    <input
+                                        type="checkbox"
+                                        name="service"
+                                        value="Digital Product"
+                                    />
+                                    <span>Digital product (guide / template)</span>
+                                </label>
+                                <span class="err">Tick at least one so we know where to start.</span>
+                            </fieldset>
+
                             <div class="field-row">
-                                <div class="field">
-                                    <label for="service">What do you need? <span class="req">*</span></label>
-                                    <select class="select" id="service" name="service" data-required>
-                                        <option value="">Choose one…</option>
-                                        <option>Mobile app development</option>
-                                        <option>AI automation</option>
-                                        <option>Digital product (guide / template)</option>
-                                        <option>More than one of these</option>
-                                        <option>Something else</option>
-                                    </select>
-                                    <span class="err">Pick the closest match.</span>
-                                </div>
                                 <div class="field">
                                     <label for="budget">Budget range</label>
                                     <select class="select" id="budget" name="budget">
@@ -111,6 +120,11 @@
                                         <option>$5k – $15k</option>
                                         <option>$15k+</option>
                                     </select>
+                                </div>
+                                <div class="field">
+                                    <label for="address">Where are you based? <span class="req">*</span></label>
+                                    <input class="input" id="address" name="address" type="text" autocomplete="address-level2" placeholder="City, country" data-required />
+                                    <span class="err">City and country is plenty.</span>
                                 </div>
                             </div>
 
